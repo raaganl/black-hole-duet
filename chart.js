@@ -1,6 +1,8 @@
 const margin = { top: 70, right: 30, bottom: 40, left: 80 };
 const width = 1200 - margin.left - margin.right;
 const height = 500 - margin.top - margin.bottom;
+let animationSpeed = 100000;
+let animationFlow = true;
 
 const x = d3.scaleLinear()
   .domain(d3.extent(data, d => d.t))
@@ -37,16 +39,58 @@ const path = svg.append("path")
   .attr("d", line);
 
 const length = path.node().getTotalLength();
-console.log(length);
 
+function standardAnimation() {
+    const currentOffset = +path.attr("stroke-dashoffset");
+    const distance = currentOffset;
+    const scaledDuration = 30000 * (distance / length);
 
-function animation(){
     path.attr("stroke-dasharray", length + " " + length)
-        .attr("stroke-dashoffset", length)
-          .transition()
-          .ease(d3.easeLinear)
-          .attr("stroke-dashoffset", 0)
-          .duration(100000)
-          .on("end", () => setTimeout(animation, 1000)); 
+        .transition()
+        .ease(d3.easeLinear)
+        .duration(scaledDuration)
+        .attr("stroke-dashoffset", 0)
+        .on("end", () => setTimeout(standardAnimation, 1000));
 };
-animation();
+
+function forwardAnimation() {
+    const currentOffset = +path.attr("stroke-dashoffset");
+    const distance = currentOffset;
+    const scaledDuration = 10000 * (distance / length);
+
+    path.attr("stroke-dasharray", length + " " + length)
+        .transition()
+        .ease(d3.easeLinear)
+        .duration(scaledDuration)
+        .attr("stroke-dashoffset", 0)
+        .on("end", () => setTimeout(forwardAnimation, 1000));
+
+    console.log(length);
+};
+
+function backAnimation() {
+    const currentOffset = +path.attr("stroke-dashoffset");
+    const distance = length - currentOffset;
+    const scaledDuration = 10000 * (distance / length);
+
+    path.attr("stroke-dasharray", length + " " + length)
+        .transition()
+        .ease(d3.easeLinear)
+        .duration(scaledDuration)
+        .attr("stroke-dashoffset", length)
+        .on("end", () => setTimeout(backAnimation, 1000));
+};
+
+document.onkeydown = function(event) {
+    const key = event.key;
+    if (key === "ArrowLeft") backAnimation();
+    else if (key === "ArrowRight") forwardAnimation();
+};
+
+document.onkeyup = function(event) {
+    const key = event.key;
+    if (key === "ArrowLeft" || key === "ArrowRight") standardAnimation();
+};
+
+standardAnimation();
+
