@@ -9,7 +9,7 @@ const x = d3.scaleLinear()
   .range([0, width]);                   
 
 const y = d3.scaleLinear()
-  .domain(d3.extent(data, d => d.hz))
+  .domain(d3.extent(data, d => d.amp))
   .range([height, 0]);                        
 
 const svg = d3.select("#chart-container")
@@ -26,12 +26,12 @@ svg.append("g")
   .call(g => g.remove());
 
 svg.append("g")
-  .call(d3.axisLeft(y).tickFormat(d => d.toFixed(0) + " Hz"))
+  .call(d3.axisLeft(y).tickFormat(d => d.toFixed(0) + " amplitude"))
   .call(g => g.select(".domain").remove());
 
 const line = d3.line()
   .x(d => x(d.t))
-  .y(d => y(d.hz))
+  .y(d => y(d.amp))
   .curve(d3.curveCatmullRom.alpha(.7));
 
 const path = svg.append("path")
@@ -41,12 +41,18 @@ const path = svg.append("path")
   .attr("stroke-width", 2)
   .attr("d", line);
   
+function animation(){
+  const length = path.node().getTotalLength();
+  path.attr("stroke-dasharray", length + " " + length)
+    .attr("stroke-dashoffset", length)
+    .transition()
+    .duration(5000)
+    .attr("stroke-dashoffset", 0)
+    .on("end", () => setTimeout(animation, 1000));
 
-const length = path.node().getTotalLength();
-path.attr("stroke-dasharray", length + " " + length)
-  .attr("stroke-dashoffset", length);
+}
+  const point = path.node().getPointAtLength(40);
 
-const point = path.node().getPointAtLength(40);
 
 // const timeLabel = svg.append("text")
 //   .attr("y", height + 40)
@@ -54,58 +60,57 @@ const point = path.node().getPointAtLength(40);
 //   .style("font-size", "14px")
 //   .text("test");
 
-standardAnimation();
+// standardAnimation();
 
-function standardAnimation() {
-    const currentOffset = +path.attr("stroke-dashoffset");
-    const distance = currentOffset;
-    const scaledDuration = 100000 * (distance / length);
+// function standardAnimation() {
+//     const currentOffset = parseFloat(path.attr("x"));
+//     const scaledDuration = currentOffset * 1000;
 
-    path.attr("stroke-dasharray", length + " " + length)
-        .transition()
-        .ease(d3.easeLinear)
-        .duration(scaledDuration)
-        .attr("stroke-dashoffset", 0)
-        .on("end", () => setTimeout(standardAnimation, 1000));
-};
+//     path.attr("stroke-dasharray", length + " " + length)
+//         .transition()
+//         .ease(d3.easeLinear)
+//         .duration(scaledDuration)
+//         .attr("stroke-dashoffset", 0)
+//         .on("end", () => setTimeout(standardAnimation, 1000));
+// };
 
-function forwardAnimation() {
-    const currentOffset = +path.attr("stroke-dashoffset");
-    const distance = currentOffset;
-    const scaledDuration = 60000 * (distance / length);
+// function forwardAnimation() {
+//     const currentOffset = parseFloat(path.attr("x"));
+//     const scaledDuration = currentOffset * 1000;
 
-    path.attr("stroke-dasharray", length + " " + length)
-        .transition()
-        .ease(d3.easeLinear)
-        .duration(scaledDuration)
-        .attr("stroke-dashoffset", 0)
-        .on("end", () => setTimeout(forwardAnimation, 1000));
+//     path.attr("stroke-dasharray", length + " " + length)
+//         .transition()
+//         .ease(d3.easeLinear)
+//         .duration(scaledDuration)
+//         .attr("stroke-dashoffset", 0)
+//         .on("end", () => setTimeout(forwardAnimation, 1000));
 
-    console.log(length);
-};
+//     console.log(length);
+// };
 
-function backAnimation() {
-    const currentOffset = +path.attr("stroke-dashoffset");
-    const distance = length - currentOffset;
-    const scaledDuration = 60000 * (distance / length);
+// function backAnimation() {
+//     const currentOffset = +path.attr("stroke-dashoffset");
+//     const distance = length - currentOffset;
+//     const scaledDuration = 60000 * (distance / length);
 
-    path.attr("stroke-dasharray", length + " " + length)
-        .transition()
-        .ease(d3.easeLinear)
-        .duration(scaledDuration)
-        .attr("stroke-dashoffset", length)
-        .on("end", () => setTimeout(backAnimation, 1000));
-};
+//     path.attr("stroke-dasharray", length + " " + length)
+//         .transition()
+//         .ease(d3.easeLinear)
+//         .duration(scaledDuration)
+//         .attr("stroke-dashoffset", length)
+//         .on("end", () => setTimeout(backAnimation, 1000));
+// };
 
-document.onkeydown = function(event) {
-    const key = event.key;
-    if (key === "ArrowLeft") backAnimation();
-    else if (key === "ArrowRight") forwardAnimation();
-};
+// document.onkeydown = function(event) {
+//     const key = event.key;
+//     if (key === "ArrowLeft") backAnimation();
+//     else if (key === "ArrowRight") forwardAnimation();
+// };
 
-document.onkeyup = function(event) {
-    const key = event.key;
-    if (key === "ArrowLeft" || key === "ArrowRight") standardAnimation();
-};
+// document.onkeyup = function(event) {
+//     const key = event.key;
+//     if (key === "ArrowLeft" || key === "ArrowRight") standardAnimation();
+// };
 
+animation();
 

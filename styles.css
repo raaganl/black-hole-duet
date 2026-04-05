@@ -1,5 +1,6 @@
 body{
     background-color:#191917;
+    overflow:hidden;
 }
 #screen-container{
     display:flex;
@@ -9,6 +10,7 @@ body{
     background-color:#191917;
     width:100vw;
     height:100vh;
+    box-sizing: border-box;
 }
 #content-container{
     height:fit-content;
