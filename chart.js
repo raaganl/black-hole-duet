@@ -1,6 +1,6 @@
-const margin = { top: 70, right: 30, bottom: 40, left: 80 };
-const width = 1200 - margin.left - margin.right;
-const height = 500 - margin.top - margin.bottom;
+const margin = { top: 100, right: 100, bottom: 100, left: 100};
+const width = 864
+const height = 400;
 let animationSpeed = 100000;
 let animationFlow = true;
 
@@ -16,8 +16,10 @@ const svg = d3.select("#chart-container")
   .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
+    .attr("color", "white")
   .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
+
 
 svg.append("g")
   .attr("transform", `translate(0,${height})`)
@@ -29,21 +31,34 @@ svg.append("g")
 const line = d3.line()
   .x(d => x(d.t))
   .y(d => y(d.hz))
-  .curve(d3.curveCatmullRom.alpha(0.5));
+  .curve(d3.curveCatmullRom.alpha(.7));
 
 const path = svg.append("path")
   .datum(data)
   .attr("fill", "none")
-  .attr("stroke", "steelblue")
-  .attr("stroke-width", 1.2)
+  .attr("stroke", "white")
+  .attr("stroke-width", 2)
   .attr("d", line);
+  
 
 const length = path.node().getTotalLength();
+path.attr("stroke-dasharray", length + " " + length)
+  .attr("stroke-dashoffset", length);
+
+const point = path.node().getPointAtLength(40);
+
+const timeLabel = svg.append("text")
+  .attr("y", height + 40)
+  .attr("fill", "white")
+  .style("font-size", "14px")
+  .text("test");
+
+standardAnimation();
 
 function standardAnimation() {
     const currentOffset = +path.attr("stroke-dashoffset");
     const distance = currentOffset;
-    const scaledDuration = 30000 * (distance / length);
+    const scaledDuration = 100000 * (distance / length);
 
     path.attr("stroke-dasharray", length + " " + length)
         .transition()
@@ -56,7 +71,7 @@ function standardAnimation() {
 function forwardAnimation() {
     const currentOffset = +path.attr("stroke-dashoffset");
     const distance = currentOffset;
-    const scaledDuration = 10000 * (distance / length);
+    const scaledDuration = 60000 * (distance / length);
 
     path.attr("stroke-dasharray", length + " " + length)
         .transition()
@@ -71,7 +86,7 @@ function forwardAnimation() {
 function backAnimation() {
     const currentOffset = +path.attr("stroke-dashoffset");
     const distance = length - currentOffset;
-    const scaledDuration = 10000 * (distance / length);
+    const scaledDuration = 60000 * (distance / length);
 
     path.attr("stroke-dasharray", length + " " + length)
         .transition()
@@ -92,5 +107,4 @@ document.onkeyup = function(event) {
     if (key === "ArrowLeft" || key === "ArrowRight") standardAnimation();
 };
 
-standardAnimation();
 
