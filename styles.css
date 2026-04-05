@@ -1,3 +1,18 @@
 body{
-    background-color:black;
+    background-color:#191917;
+}
+#screen-container{
+    display:flex;
+    flex-direction:row;
+    justify-content:center;
+    align-items: center;
+    background-color:#191917;
+    width:100vw;
+    height:100vh;
+}
+#content-container{
+    height:fit-content;
+    width:fit-content;
+    background-color:#242421;
+    border-radius:30px;
 }

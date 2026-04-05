@@ -20,13 +20,14 @@ const svg = d3.select("#chart-container")
   .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-
 svg.append("g")
   .attr("transform", `translate(0,${height})`)
-  .call(d3.axisBottom(x).tickFormat(d => d.toFixed(2) + "s"));
+  .call(d3.axisBottom(x).tickFormat(d => d.toFixed(2) + "s"))
+  .call(g => g.remove());
 
 svg.append("g")
-  .call(d3.axisLeft(y).tickFormat(d => d.toFixed(0) + " Hz"));
+  .call(d3.axisLeft(y).tickFormat(d => d.toFixed(0) + " Hz"))
+  .call(g => g.select(".domain").remove());
 
 const line = d3.line()
   .x(d => x(d.t))
@@ -47,11 +48,11 @@ path.attr("stroke-dasharray", length + " " + length)
 
 const point = path.node().getPointAtLength(40);
 
-const timeLabel = svg.append("text")
-  .attr("y", height + 40)
-  .attr("fill", "white")
-  .style("font-size", "14px")
-  .text("test");
+// const timeLabel = svg.append("text")
+//   .attr("y", height + 40)
+//   .attr("fill", "white")
+//   .style("font-size", "14px")
+//   .text("test");
 
 standardAnimation();
 
