@@ -41,17 +41,20 @@ const path = svg.append("path")
   .attr("stroke-width", 2)
   .attr("d", line);
   
-function animation(){
-  const length = path.node().getTotalLength();
-  path.attr("stroke-dasharray", length + " " + length)
-    .attr("stroke-dashoffset", length)
-    .transition()
-    .duration(5000)
-    .attr("stroke-dashoffset", 0)
-    .on("end", () => setTimeout(animation, 1000));
+const curtain = svg.append("rect")
+  .attr("x", "0")   
+  .attr("y", -margin.top)  
+  .attr("width", "100%")
+  .attr("height", height+margin.top+margin.bottom)
+  .attr("fill", "#02011a");
 
+function animation(){
+  curtain.transition()
+    .duration(6000)
+    .attr("x", "100%");      
 }
-  const point = path.node().getPointAtLength(40);
+
+const point = path.node().getPointAtLength(40);
 
 
 // const timeLabel = svg.append("text")

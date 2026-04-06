@@ -1,5 +1,8 @@
+root{
+    --background-color: 
+}
 body{
-    background-color:#191917;
+    background-color:#02011a;
     overflow:hidden;
 }
 #screen-container{
@@ -7,14 +10,8 @@ body{
     flex-direction:row;
     justify-content:center;
     align-items: center;
-    background-color:#191917;
+    background-color:#02011a;
     width:100vw;
     height:100vh;
     box-sizing: border-box;
-}
-#content-container{
-    height:fit-content;
-    width:fit-content;
-    background-color:#242421;
-    border-radius:30px;
 }
