@@ -2,16 +2,18 @@ const margin = { top: 100, right: 100, bottom: 100, left: 100};
 const width = 864
 const height = 400;
 let animationSpeed = 100000;
-let animationFlow = true;
 
+//x axis, time
 const x = d3.scaleLinear()
   .domain(d3.extent(data, d => d.t))
   .range([0, width]);                   
 
+//y axis, amplitude 
 const y = d3.scaleLinear()
   .domain(d3.extent(data, d => d.amp))
   .range([height, 0]);                        
 
+//chart, contains all data
 const svg = d3.select("#chart-container")
   .append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -34,13 +36,26 @@ const line = d3.line()
   .y(d => y(d.amp))
   .curve(d3.curveCatmullRom.alpha(.7));
 
+//background glowing effect for drawn path
+const pathGlow = svg.append("path")
+  .datum(data)
+  .attr("fill", "none")
+  .attr("stroke", "#b2a14080")
+  .attr("stroke-width", 10)
+  .attr("d", line)
+  .attr("stroke-linecap", "round")
+  .attr("stroke-linejoin", "round");
+
 const path = svg.append("path")
   .datum(data)
   .attr("fill", "none")
-  .attr("stroke", "white")
-  .attr("stroke-width", 2)
-  .attr("d", line);
-  
+  .attr("stroke", "#fffaba")
+  .attr("stroke-width", 3)
+  .attr("d", line)
+  .attr("stroke-linecap", "round")
+  .attr("stroke-linejoin", "round");
+
+//controls reveal of graph
 const curtain = svg.append("rect")
   .attr("x", "0")   
   .attr("y", -margin.top)  
@@ -48,61 +63,47 @@ const curtain = svg.append("rect")
   .attr("height", height+margin.top+margin.bottom)
   .attr("fill", "#02011a");
 
+//marks line where data is emerging
+const curtainLine = svg.append("rect")
+  .attr("x", "0")   
+  .attr("y", -margin.top)  
+  .attr("width", "3px")
+  .attr("height", height+margin.top+margin.bottom)
+  .attr("fill", "#2e2d34");
+
+const ghostClip = svg.append("clipPath")
+  .attr("id", "ghost-clip")
+  .append("rect")
+  .attr("x", "0")
+  .attr("y", -margin.top)
+  .attr("width", "100%")
+  .attr("height", height + margin.top + margin.bottom);
+
+const ghostPath = svg.append("path")
+  .datum(data)
+  .attr("fill", "none")
+  .attr("stroke", "#2e2d34")
+  .attr("stroke-width", 3)
+  .attr("d", line)
+  .attr("clip-path", "url(#ghost-clip)")
+  .attr("stroke-linecap", "round")
+  .attr("stroke-linejoin", "round");
+
 function animation(){
   curtain.transition()
     .duration(6000)
-    .attr("x", "100%");      
+    .attr("x", "100%");
+
+  curtainLine.transition()
+    .duration(6000)
+    .attr("x", "100%");
+
+  ghostClip.transition()
+    .duration(6000)
+    .attr("x", "100%");
 }
 
 const point = path.node().getPointAtLength(40);
-
-
-// const timeLabel = svg.append("text")
-//   .attr("y", height + 40)
-//   .attr("fill", "white")
-//   .style("font-size", "14px")
-//   .text("test");
-
-// standardAnimation();
-
-// function standardAnimation() {
-//     const currentOffset = parseFloat(path.attr("x"));
-//     const scaledDuration = currentOffset * 1000;
-
-//     path.attr("stroke-dasharray", length + " " + length)
-//         .transition()
-//         .ease(d3.easeLinear)
-//         .duration(scaledDuration)
-//         .attr("stroke-dashoffset", 0)
-//         .on("end", () => setTimeout(standardAnimation, 1000));
-// };
-
-// function forwardAnimation() {
-//     const currentOffset = parseFloat(path.attr("x"));
-//     const scaledDuration = currentOffset * 1000;
-
-//     path.attr("stroke-dasharray", length + " " + length)
-//         .transition()
-//         .ease(d3.easeLinear)
-//         .duration(scaledDuration)
-//         .attr("stroke-dashoffset", 0)
-//         .on("end", () => setTimeout(forwardAnimation, 1000));
-
-//     console.log(length);
-// };
-
-// function backAnimation() {
-//     const currentOffset = +path.attr("stroke-dashoffset");
-//     const distance = length - currentOffset;
-//     const scaledDuration = 60000 * (distance / length);
-
-//     path.attr("stroke-dasharray", length + " " + length)
-//         .transition()
-//         .ease(d3.easeLinear)
-//         .duration(scaledDuration)
-//         .attr("stroke-dashoffset", length)
-//         .on("end", () => setTimeout(backAnimation, 1000));
-// };
 
 // document.onkeydown = function(event) {
 //     const key = event.key;
