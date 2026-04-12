@@ -5,13 +5,32 @@ body{
     background-color:#02011a;
     overflow:hidden;
 }
-#screen-container{
+#viz-container{
     display:flex;
     flex-direction:row;
     justify-content:center;
     align-items: center;
     background-color:#02011a;
-    width:100vw;
+    width:fit-content;
     height:100vh;
     box-sizing: border-box;
+    padding-bottom:400px;
+}
+#animation{
+    position:relative;
+    width:800px;
+    height:100vh;
+
+}
+#video{
+    position:absolute;
+    top:200px;
+    left:10px;
+    width:100%;
+    height:fit-content;
+}
+#screen-container{
+    display:flex;
+    flex-direction:row;
+    gap:100px;
 }
