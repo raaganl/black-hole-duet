@@ -19,26 +19,27 @@ void initSensor();
 float readSensor();
 GenericSensor sensor = GenericSensor(readSensor, initSensor);
 
-float target_velocity        = -6;
-float smoothVel              = 0;
-float lastAngle              = 0;
+float target_velocity     = -6;
+float smoothVel           = 0;
+float lastAngle           = 0;
 unsigned long lastVelTime    = 0;
 unsigned long lastPrintTime  = 0;
 unsigned long motorStartTime = 0;
 unsigned long touchedTime    = 0;
 unsigned long pulseStart     = 0;
-bool motorRunning            = true;
-int pulsePhase               = 0;
-float pulseStartAngle        = 0;
-float pulseMove              = 0;
+bool motorRunning         = true;
+int pulsePhase            = 0;
+float pulseStartAngle     = 0;
+float pulseMove           = 0;
+int pulseSuccessCount     = 0;
 
 #define SPINUP_MS         2000
 #define TOUCH_DIFF        80
-#define DEAD_TIME_MS      200     // fast response
-#define PULSE_MS          100
-#define PULSE_VOLTAGE     0.3
-#define PULSE_MOVE_MIN    1.0
-#define PULSE_MOVE_MAX    4.0
+#define DEAD_TIME_MS      1000
+#define PULSE_MS          125
+#define PULSE_VOLTAGE     0.4
+#define PULSE_MOVE_MIN    3.5
+#define PULSE_MOVE_MAX    4.5
 
 void enableMotor() {
   digitalWrite(STANDBY_PIN, HIGH);
@@ -139,9 +140,10 @@ void loop() {
     if (diff > TOUCH_DIFF) {
       disableMotor();
       motor.disable();
-      motorRunning  = false;
-      pulsePhase    = 0;
-      touchedTime   = now;
+      motorRunning      = false;
+      pulsePhase        = 0;
+      touchedTime       = now;
+      pulseSuccessCount = 0;
       Serial.println("STATE: TOUCHED");
       Serial.print("  diff: "); Serial.println(diff);
       Serial.print("  smoothVel: "); Serial.println(smoothVel);
@@ -174,18 +176,29 @@ void loop() {
     Serial.print("-"); Serial.print(PULSE_MOVE_MAX); Serial.println(")");
 
     if (pulseMove > PULSE_MOVE_MIN && pulseMove < PULSE_MOVE_MAX) {
-      motor.PID_velocity.reset();
-      enableMotor();
-      motor.enable();
-      motorRunning   = true;
-      motorStartTime = now;
-      Serial.println("STATE: RELEASED");
+      pulseSuccessCount++;
+      Serial.print("SUCCESS #"); Serial.println(pulseSuccessCount);
+
+      if (pulseSuccessCount >= 1) {
+        pulseSuccessCount = 0;
+        motor.PID_velocity.reset();
+        enableMotor();
+        motor.enable();
+        motorRunning   = true;
+        motorStartTime = now;
+        Serial.println("STATE: RUNNING");
+      } else {
+        touchedTime = now;
+        Serial.println("one success, confirming...");
+      }
+
     } else {
+      pulseSuccessCount = 0;
       touchedTime = now;
       if (pulseMove <= PULSE_MOVE_MIN) {
-        Serial.println("HELD — barely moved, hand still on");
+        Serial.println("HELD");
       } else {
-        Serial.println("SPINNING — moved too much, hand spinning disk");
+        Serial.println("SPINNING");
       }
     }
   }
@@ -199,11 +212,11 @@ void loop() {
     Serial.print(" | diff: ");   Serial.print(diff);
     Serial.print(" | spunUp: "); Serial.print(spunUp ? "Y" : "N");
     Serial.print(" | phase: ");  Serial.print(pulsePhase);
+    Serial.print(" | pSucc: ");  Serial.print(pulseSuccessCount);
     Serial.print(" | STATE: ");  Serial.println(motorRunning ? "RUNNING" : "STOPPED");
 
-    
-  } 
-  if  (!motorRunning && pulsePhase == 0) {
+    if (!motorRunning && pulsePhase == 0) {
       Serial.print("VEL: "); Serial.println(smoothVel, 1);
     }
+  }
 }
