@@ -38,7 +38,7 @@ int pulseSuccessCount     = 0;
 #define DEAD_TIME_MS      1000
 #define PULSE_MS          125
 #define PULSE_VOLTAGE     0.4
-#define PULSE_MOVE_MIN    3.5
+#define PULSE_MOVE_MIN    3
 #define PULSE_MOVE_MAX    4.5
 
 void enableMotor() {
