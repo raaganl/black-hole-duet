@@ -52,7 +52,7 @@ function tick() {
     if (smoothVel === 0) return;
 
     // scale velocity to scrub speed — tune this number up or down
-    const scrubAmount = smoothVel * 0.002;
+    const scrubAmount = smoothVel * 0.0002;
 
     video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + scrubAmount));
 }
