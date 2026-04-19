@@ -154,7 +154,7 @@ loadData("data.csv").then(data => {
 
   requestAnimationFrame(syncToVideo);
 
-  animation("default");
+  //animation("default");
 
 
 
