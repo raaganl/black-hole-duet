@@ -7,16 +7,22 @@
 
 <body>
     <div id = "screen-container">
-        <div id = "animation">
+        <div id = "vid-container">
             <video autoplay loop id="video">
-                <source src="output3.mp4" type="video/mp4">
+                <source src="output.mp4" type="video/mp4">
             </video>
         </div>
-        <div id = "viz-container">
-            <div id = "curtain">
+       <div id="viz-text-container">
+            <div id="viz-container">
+                <div id="curtain">
                 <div id="chart-container"></div>
             </div>
         </div>
+        <h1 id="exhibit-title">A black hole duet</h1>
+        <p id="exhibit-text">This is a black hole merger: two black holes that have been caught in each other's orbit. The force of their pull sends ripples through spacetime, called gravitational waves.</p>
+        <p id="exhibit-text"><i>Using the record player in front of you, slow down, speed up, or rewind the merger.</i></p>
+        <p id = "exhibit-text">Listen closely, the sound you hear is the gravitational waves translated into sound waves for you to experience.</p>
+    </div>  
     </div>
     <script src="d3.js"></script>
     <script src="data.js"></script>

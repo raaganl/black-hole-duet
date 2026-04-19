@@ -1,6 +1,6 @@
 const margin = { top: 100, right: 100, bottom: 100, left: 100};
-const width = 400;
-const height = 200;
+const width = 500;
+const height = 300;
 let animationSpeed = 100000;
 
 async function loadData(csvPath) {
@@ -37,10 +37,10 @@ loadData("data.csv").then(data => {
   //   .call(d3.axisBottom(x).tickFormat(d => d.toFixed(2) + "s"))
   //   .call(g => g.remove());
 
-  svg.append("g")
-    .call(d3.axisLeft(y).tickFormat(d => d.toFixed(0)))
-    .call(g => g.select(".domain").remove())
-    .attr("color","#fffaba");
+  // svg.append("g")
+  //   .call(d3.axisLeft(y).tickFormat(d => d.toFixed(0)))
+  //   .call(g => g.select(".domain").remove())
+  //   .attr("color","#fffaba");
 
   const line = d3.line()
     .x(d => x(d.t))
