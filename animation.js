@@ -61,7 +61,7 @@ function stopAudio() {
 // --- CONNECT BUTTON ---
 const btn = document.createElement('button');
 btn.innerText = 'Connect Dial';
-btn.style.cssText = 'position:fixed; top:20px; left:20px; z-index:999; padding:10px 20px; font-size:16px; cursor:pointer; background:white;';
+btn.style.cssText = 'position:fixed; top:100px; left:100px; z-index:999; padding:10px 20px; font-size:16px; cursor:pointer; background:white;';
 document.body.appendChild(btn);
 
 btn.addEventListener('click', async () => {
@@ -79,6 +79,7 @@ async function connectSerial() {
         btn.innerText = 'Dial Connected';
         btn.style.background = 'green';
         btn.style.color = 'white';
+        // btn.style.display = "none";
 
         const decoder = new TextDecoderStream();
         selectedPort.readable.pipeTo(decoder.writable);
