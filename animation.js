@@ -3,6 +3,7 @@ const video = document.getElementById('video');
 let smoothVel = 0;
 let stopped = false;
 let selectedPort = null;
+let everConnected = false;
 
 // --- AUDIO ---
 let audioCtx = null;
@@ -20,7 +21,6 @@ async function initAudio() {
     gainNode.gain.value = 1.0;
     gainNode.connect(audioCtx.destination);
 
-    // fetch and decode the video's audio track separately
     const response = await fetch('output3.mp4');
     const arrayBuffer = await response.arrayBuffer();
     audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
@@ -30,20 +30,18 @@ async function initAudio() {
 function playAudioAt(position, rate) {
     if (!audioCtx || !audioBuffer) return;
 
-    // stop current source
     if (audioSource) {
         try { audioSource.stop(); } catch {}
         audioSource = null;
     }
 
-    if (Math.abs(rate) < 0.01) return; // too slow, don't play
+    if (Math.abs(rate) < 0.01) return;
 
-    // clamp position
     position = Math.max(0, Math.min(audioBuffer.duration, position));
 
     audioSource = audioCtx.createBufferSource();
     audioSource.buffer = audioBuffer;
-    audioSource.playbackRate.value = Math.abs(rate); // rate controls speed
+    audioSource.playbackRate.value = Math.abs(rate);
     audioSource.connect(gainNode);
     audioSource.start(0, position);
 
@@ -68,6 +66,7 @@ btn.addEventListener('click', async () => {
     selectedPort = await navigator.serial.requestPort();
     navigator.wakeLock.request('screen').catch(err => console.log(err));
     await initAudio();
+    everConnected = false;
     connectSerial();
 });
 
@@ -76,10 +75,10 @@ async function connectSerial() {
         try { await selectedPort.close(); } catch {}
         await selectedPort.open({ baudRate: 115200 });
 
+        everConnected = true;
         btn.innerText = 'Dial Connected';
         btn.style.background = 'green';
         btn.style.color = 'white';
-        // btn.style.display = "none";
 
         const decoder = new TextDecoderStream();
         selectedPort.readable.pipeTo(decoder.writable);
@@ -100,10 +99,16 @@ async function connectSerial() {
     } catch (err) {
         console.log('disconnected:', err);
     } finally {
-        btn.innerText = 'Reconnecting...';
-        btn.style.background = 'orange';
         try { await selectedPort.close(); } catch {}
-        setTimeout(() => connectSerial(), 2000);
+        if (everConnected) {
+            btn.innerText = 'Reconnecting...';
+            btn.style.background = 'orange';
+            setTimeout(() => connectSerial(), 2000);
+        } else {
+            btn.innerText = 'Connect Dial';
+            btn.style.background = 'white';
+            btn.style.color = 'black';
+        }
     }
 }
 
@@ -133,11 +138,8 @@ function tick() {
         const rate = smoothVel * 0.01;
         const scrubAmount = smoothVel * 0.0002;
 
-        // scrub video visually
         video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + scrubAmount));
 
-        // restart audio every 300ms at current position so it stays in sync
-        // without this the audio buffer would keep playing from where it started
         const now = audioCtx ? audioCtx.currentTime : 0;
         if (audioCtx && (Math.abs(smoothVel - lastScrubVel) > 2 || now - audioRestartTimer > 0.3)) {
             playAudioAt(video.currentTime, rate);
@@ -146,7 +148,6 @@ function tick() {
         }
 
     } else {
-        // motor running — stop separate audio, let video play normally
         stopAudio();
         video.playbackRate = 1.0;
         if (video.paused) video.play();
