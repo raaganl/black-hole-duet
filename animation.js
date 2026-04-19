@@ -1,3 +1,5 @@
+import { SoundTouch, SimpleFilter, WebAudioBufferSource, getWebAudioNode } from './node_modules/soundtouchjs/dist/soundtouch.js';
+
 const video = document.getElementById('video');
 
 let smoothVel = 0;
@@ -10,8 +12,6 @@ let audioCtx = null;
 let audioBuffer = null;
 let audioSource = null;
 let gainNode = null;
-let lastAudioPos = 0;
-let lastAudioStart = 0;
 
 async function initAudio() {
     if (audioCtx) return;
@@ -21,32 +21,26 @@ async function initAudio() {
     gainNode.gain.value = 1.0;
     gainNode.connect(audioCtx.destination);
 
-    const response = await fetch('output3.mp4');
+    const response = await fetch('output.mp4');
     const arrayBuffer = await response.arrayBuffer();
     audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-    console.log('audio loaded, duration:', audioBuffer.duration);
+    console.log('audio loaded:', audioBuffer.duration);
 }
 
-function playAudioAt(position, rate) {
-    if (!audioCtx || !audioBuffer) return;
-
+function startAudio(positionSeconds, rate) {
+    // stop existing source
     if (audioSource) {
         try { audioSource.stop(); } catch {}
         audioSource = null;
     }
-
-    if (Math.abs(rate) < 0.01) return;
-
-    position = Math.max(0, Math.min(audioBuffer.duration, position));
+    if (!audioCtx || !audioBuffer) return;
+    if (Math.abs(rate) < 0.05) return;
 
     audioSource = audioCtx.createBufferSource();
     audioSource.buffer = audioBuffer;
     audioSource.playbackRate.value = Math.abs(rate);
     audioSource.connect(gainNode);
-    audioSource.start(0, position);
-
-    lastAudioPos = position;
-    lastAudioStart = audioCtx.currentTime;
+    audioSource.start(0, Math.max(0, Math.min(audioBuffer.duration, positionSeconds)));
 }
 
 function stopAudio() {
@@ -126,25 +120,25 @@ function parseLine(line) {
     }
 }
 
-let lastScrubVel = 0;
-let audioRestartTimer = 0;
-
 function tick() {
     requestAnimationFrame(tick);
 
     if (stopped) {
         video.pause();
 
-        const rate = smoothVel * 0.01;
+        const rate = smoothVel * 0.001;
         const scrubAmount = smoothVel * 0.0002;
 
         video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + scrubAmount));
 
-        const now = audioCtx ? audioCtx.currentTime : 0;
-        if (audioCtx && (Math.abs(smoothVel - lastScrubVel) > 2 || now - audioRestartTimer > 0.3)) {
-            playAudioAt(video.currentTime, rate);
-            audioRestartTimer = now;
-            lastScrubVel = smoothVel;
+        if (audioCtx) {
+            if (!audioSource) {
+                // no audio running yet — start it
+                startAudio(video.currentTime, rate);
+            } else {
+                // already running — just update rate live, no restart
+                audioSource.playbackRate.value = Math.abs(rate);
+            }
         }
 
     } else {
